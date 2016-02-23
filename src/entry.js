@@ -12,7 +12,9 @@ import AddGame from './components/AddGame.js';
 export default ReactDOM.render(
   <section>
     <Header />
-    <AddGame />
+    <section className="container">
+      <AddGame />
+    </section>
   </section>,
   document.getElementById('react-mount')
 );

@@ -6,20 +6,26 @@ import ReactDOM from 'react-dom';
 
 class AddGame extends React.Component {
   searchGame = (e) => {
+    e.preventDefault();
+
     var baseURL = "http://www.boardgamegeek.com/xmlapi/search?search=";
     var urlSuffix = "&exact=1";
-    e.preventDefault();
     var searchedGame = ReactDOM.findDOMNode(this.refs.gameInput).value;
+    var self = this;
+
     console.log(searchedGame);
+
     $.get(baseURL + searchedGame + urlSuffix, function(result) {
-      console.log(result);
-      var JSON = this.convertXML(result);
-      console.log(JSON);
+      var jsonResult = self.convertXML($(result)[0]);
+      self.parseResults(jsonResult);
     });
   };
-  convertXML = (XML) => {
-    console.log(XML);
-    // Changes XML to JSON
+  //TODO: Maybe find better way to convert to JSON from XML
+  convertXML = (xml) => {
+    var result = xmlToJson(xml);
+    return result;
+
+    function xmlToJson(xml) {
       // Create the return object
       var obj = {};
 
@@ -38,7 +44,7 @@ class AddGame extends React.Component {
 
       // do children
       if (xml.hasChildNodes()) {
-        for(var i = 0; i < xml.childNodes.length; i++) {
+        for (var i = 0; i < xml.childNodes.length; i++) {
           var item = xml.childNodes.item(i);
           var nodeName = item.nodeName;
           if (typeof(obj[nodeName]) == "undefined") {
@@ -54,6 +60,25 @@ class AddGame extends React.Component {
         }
       }
       return obj;
+    }
+  };
+  //TODO: Better iteration over this
+  parseResults = (JSON) => {
+    var boardGames = JSON.boardgames.boardgame;
+    console.log(boardGames);
+
+    for(var x=0; x < boardGames.length; x++) {
+      console.log(boardGames[x]);
+    }
+  };
+  buildItems = () => {
+    return this.props.gridItems.map(function(item, index) {
+      return <div className="item" key={index}>
+        <img src={item.image} />
+        <h5>{item.title}</h5>
+        <p>{item.body}</p>
+      </div>
+    });
   };
   render() {
     return (
@@ -67,6 +92,7 @@ class AddGame extends React.Component {
             </div>
           </form>
         </div>
+        {this.buildItems}
       </section>
     );
   }
